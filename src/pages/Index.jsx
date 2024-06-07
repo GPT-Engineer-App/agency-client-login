@@ -1,62 +1,29 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, Container, FormControl, FormLabel, Input, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Container, Heading } from "@chakra-ui/react";
+
+import { useSupabaseAuth } from "../integrations/supabase/auth.jsx";
 
 const Index = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const { session, logout } = useSupabaseAuth();
   const navigate = useNavigate();
 
-  const toggleForm = () => {
-    setIsLogin(!isLogin);
-    setError("");
-  };
-
-  const handleLogin = () => {
-    if (email === "test@example.com" && password === "password") {
-      navigate("/dashboard");
-    } else {
-      setError("Invalid email or password");
+  useEffect(() => {
+    if (!session) {
+      navigate("/login");
     }
-  };
-
-  const handleSignUp = () => {
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-    } else {
-      navigate("/dashboard");
-    }
-  };
+  }, [session, navigate]);
 
   return (
-    <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-      <VStack spacing={4} width="100%">
-        <Text fontSize="2xl">{isLogin ? "Login" : "Sign Up"}</Text>
-        <FormControl id="email">
-          <FormLabel>Email</FormLabel>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </FormControl>
-        <FormControl id="password">
-          <FormLabel>Password</FormLabel>
-          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </FormControl>
-        {!isLogin && (
-          <FormControl id="confirm-password">
-            <FormLabel>Confirm Password</FormLabel>
-            <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-          </FormControl>
+    <Container centerContent maxW="container.md" py={10}>
+      <Box width="100%" mb={4}>
+        <Heading mb={6}>Welcome to the App</Heading>
+        {session ? (
+          <Button colorScheme="teal" onClick={logout}>Logout</Button>
+        ) : (
+          <Button colorScheme="teal" onClick={() => navigate("/login")}>Login</Button>
         )}
-        {error && <Text color="red.500">{error}</Text>}
-        <Button colorScheme="teal" onClick={isLogin ? handleLogin : handleSignUp}>
-          {isLogin ? "Login" : "Sign Up"}
-        </Button>
-        <Button variant="link" onClick={toggleForm}>
-          {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
-        </Button>
-      </VStack>
+      </Box>
     </Container>
   );
 };
